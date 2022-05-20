@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" height="300" width="400">
+  <!-- Upper part of slime -->
+  <path class="slimebody" d="M 50 181 c 0 0 100 -400 300 0" stroke="transparent" stroke-width="5" fill="darkgreen" />
+  <!-- Lower part of slime -->
+  <path class="slimebody" d="M 50 180 c 0 0 150 200 300 0" stroke="transparent" stroke-width="5" fill="darkgreen" />
+  <!-- Define Eyes -->
+  <g class="eyes" stroke="black" stroke-width="3" fill="black">
+    <circle id="pointA" cx="160" cy="80" r="8" />
+    <circle id="pointB" cx="220" cy="80" r="8" />
+  </g>
+  <!-- Define Mouth -->
+  <path d="M 120 150 q 100 100 150 0" stroke="transparent" stroke-width="5" fill="black" />
+
+  Sorry, your browser does not support inline SVG.
+</svg>
