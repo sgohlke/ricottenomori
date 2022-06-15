@@ -6,6 +6,7 @@
     <meta name="description" content="Ricotte no Mori RPG">
     <title>Ricotte no Mori RPG!</title>
     <link rel="stylesheet" href="index.css">
+    <script src="index.js"></script>
   </head>
   <body>
     <header>
@@ -24,7 +25,15 @@
         </section>
         <section>
             <h2>Start the game!?</h2>
-            <span>The game is still in development! Stay tuned and be one of the first to play this hand-crafted RPG build from scratch.</span><br /><br />
+            <button onclick="createBattle()">Create Battle</button><br />
+            <span>Your battleId is:</span> <span id="battleId"></span><br /><br />
+            <section id="battleSection">
+              <section id="battleStatusSection"></section><br />
+              <section id="opponentSection"></section><br />
+              <section id="playerSection"></section><br />
+              <section id="attackSection"></section><br />
+              <section id="attackLogSection"></section><br />
+            </section>
         </section>
       </article>
     </main>
