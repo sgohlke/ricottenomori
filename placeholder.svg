@@ -1,5 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" height="300" width="400">
   <!-- Upper part of slime -->
   <circle cx="200" cy="150" r="100" stroke="black" stroke-width="3" fill="lightblue" />
+  <text x="110" y="160" font-size="1.8em">MISSING IMAGE</text>
   Sorry, your browser does not support inline SVG.
 </svg>
