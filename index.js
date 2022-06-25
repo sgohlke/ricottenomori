@@ -1,5 +1,23 @@
 const ricotteAPIUrl='https://ricotte-api.deno.dev/'
 
+function getPlayerMonsterId(player, unit) {
+    return `${player.playerId}-${unit.joinNumber}`
+}
+
+function updateMonsterHP(player) {
+    console.log('Update Monster HP', JSON.stringify(player))
+    if (player && player.unitsInBattle) {
+        for (const unit of player.unitsInBattle) {
+            const playerMonsterId = getPlayerMonsterId(player, unit)
+            console.log('unit', unit, 'playerMonsterId', playerMonsterId)
+            document.getElementById(`${playerMonsterId}-hp`).innerHTML = `HP: ${unit.inBattleStatus.hp}`
+            if (unit.inBattleStatus.hp === 0) {
+                document.getElementById(`${playerMonsterId}-unit`).className = 'monsterUnit defeated'
+            } 
+        }
+    }
+}
+
 function attack() {
     const attackingUnit = document.querySelector('input[name="attacker"]:checked');
     const defendingUnit = document.querySelector('input[name="defender"]:checked');
@@ -18,19 +36,18 @@ function attack() {
                 document.getElementById('attackLogSection').innerHTML += `Attack failed with error: ${JSON.stringify(attackResponseAsJson.error)}<br>`
             } else if (attackResponseAsJson.playerOne && attackResponseAsJson.playerTwo) {
                 if (attackResponseAsJson.playerTwo) {
-                    document.getElementById('opponentSection').innerHTML = `Your opponents monsters:<br /> ${displayMonsters(attackResponseAsJson.playerTwo)}`
+                    updateMonsterHP(attackResponseAsJson.playerTwo)
                 }
 
                 if (attackResponseAsJson.playerOne) {
-                    document.getElementById('playerSection').innerHTML = `Your monsters:<br /> ${displayMonsters(attackResponseAsJson.playerOne)}`
+                    updateMonsterHP(attackResponseAsJson.playerOne)
                 }
 
                 // Battle has ended
                 if (attackResponseAsJson.battleStatus && attackResponseAsJson.battleStatus === 1 && attackResponseAsJson.battleWinner ) {
-                   document.getElementById('battleStatusSection').innerHTML = `Battle Status:<br /> ${displayBattleStatus(attackResponseAsJson.battleStatus, attackResponseAsJson.battleWinner)}`
+                   document.getElementById('battleStatusSection').innerHTML = `<h2>Battle Status:</h2> ${displayBattleStatus(attackResponseAsJson.battleStatus, attackResponseAsJson.battleWinner)}`
                    document.getElementById('attackSection').innerHTML = ''
                 }
-
             }
         })
         .catch( (error) => {
@@ -48,27 +65,27 @@ function attack() {
 }
 
 function createAttackSection(player, opponent) {
-    let attackSectionHTML = ''
+    let attackSectionHTML = '<div id="attackSectionPanel">'
 
     if (player && player.unitsInBattle) {
-        attackSectionHTML += '<span>Attacking unit (player):<span>'
+        attackSectionHTML += '<div><span>Attacking unit (player)</span><br>'
         for (const unit of player.unitsInBattle) {
-            attackSectionHTML += `<input type="radio" id="attacker${unit.joinNumber}" name="attacker" value="${unit.joinNumber}">
-            <label for="attacker${unit.joinNumber}"> ${unit.joinNumber}-${unit.name}</label>`
+            attackSectionHTML += `<div class="monsterSelection" ><input type="radio" id="attacker${unit.joinNumber}" name="attacker" value="${unit.joinNumber}">
+            <label for="attacker${unit.joinNumber}"> ${unit.joinNumber}-${unit.name}</label></div>`
         }
     }
 
-    attackSectionHTML += '<br>'
+    attackSectionHTML += '</div>'
 
     if (opponent && opponent.unitsInBattle) {
-        attackSectionHTML += '<span>Defending unit (opponent) :<span>'
+        attackSectionHTML += '<div><span>Defending unit (opponent)</span><br>'
         for (const unit of opponent.unitsInBattle) {
-            attackSectionHTML += `<input type="radio" id="defender${unit.joinNumber}" name="defender" value="${unit.joinNumber}">
-            <label for="defender${unit.joinNumber}"> ${unit.joinNumber}-${unit.name}</label>`
+            attackSectionHTML += `<div class="monsterSelection" ><input type="radio" id="defender${unit.joinNumber}" name="defender" value="${unit.joinNumber}">
+            <label for="defender${unit.joinNumber}"> ${unit.joinNumber}-${unit.name}</label></div>`
         }
     }
 
-    attackSectionHTML += '<br><button onclick="attack()">Attack</button><br />'
+    attackSectionHTML += '</div><button id="attackButton" onclick="attack()">Attack</button></div>'
     return attackSectionHTML
 }
 
@@ -83,13 +100,27 @@ function displayBattleStatus(battleStatusAsNumber, winner = undefined) {
     }
 }
 
+function getImageForUnit(unit) {
+    let unitImageHtml = '<img src='
+    if (unit && unit.name) {
+        unitImageHtml += `"${unit.name.toLowerCase()}.svg"`
+    }
+    return unitImageHtml + 'class="monsterUnitImage"/>'
+}
+
+function isUnitDefeated(unit) {
+    return  unit && unit.inBattleStatus.hp === 0 ? ' defeated' : ''
+}
+
 function displayMonsters(player) {
     if (player && player.unitsInBattle) {
-        let playerHTML = ''
+        let playerHTML = '<section class="monsters">'
         for (const unit of player.unitsInBattle) {
-            playerHTML += JSON.stringify(unit) + '<br>' 
+            const playerMonsterId = getPlayerMonsterId(player, unit)
+            playerHTML += `<div id="${playerMonsterId}-unit" class="monsterUnit${isUnitDefeated(unit)}"> ${getImageForUnit(unit)} <div id="${playerMonsterId}-name" class="monsterUnitName">Name: ${unit.name}</div><div id="${playerMonsterId}-hp" class="monsterUnitHP">HP: ${unit.inBattleStatus.hp}</div><div id="${playerMonsterId}-atk" class="monsterUnitATK">ATK: ${unit.inBattleStatus.atk}</div><div id="${playerMonsterId}-def" class="monsterUnitDEF">DEF: ${unit.inBattleStatus.def}</div></div><br>` 
         }
 
+        playerHTML += '</section>'
         return playerHTML
     }
 }
@@ -105,18 +136,18 @@ function preparePlayerAndOpponentData(battleId) {
             console.log('Response JSON for created battle is', getBattleResponseAsJson)
             if (getBattleResponseAsJson) {
                 if (getBattleResponseAsJson.battleStatus !== undefined ) {
-                    document.getElementById('battleStatusSection').innerHTML = `Battle Status:<br /> ${displayBattleStatus(getBattleResponseAsJson.battleStatus)}`
+                    document.getElementById('battleStatusSection').innerHTML = `<h2>Battle Status:</h2> ${displayBattleStatus(getBattleResponseAsJson.battleStatus)}`
                 }
 
                 if (getBattleResponseAsJson.playerTwo) {
-                    document.getElementById('opponentSection').innerHTML = `Your opponents monsters:<br /> ${displayMonsters(getBattleResponseAsJson.playerTwo)}`
+                    document.getElementById('opponentSection').innerHTML = `<h2>Your opponents monsters:</h2> ${displayMonsters(getBattleResponseAsJson.playerTwo)}`
                 }
 
                 if (getBattleResponseAsJson.playerOne) {
-                    document.getElementById('playerSection').innerHTML = `Your monsters:<br /> ${displayMonsters(getBattleResponseAsJson.playerOne)}`
+                    document.getElementById('playerSection').innerHTML = `<h2>Your monsters:</h2> ${displayMonsters(getBattleResponseAsJson.playerOne)}`
                 }
 
-                document.getElementById('attackSection').innerHTML = createAttackSection(getBattleResponseAsJson.playerOne, getBattleResponseAsJson.playerTwo)
+                document.getElementById('attackSection').innerHTML = `<h2>Battle Actions:</h2>  ${createAttackSection(getBattleResponseAsJson.playerOne, getBattleResponseAsJson.playerTwo)}` 
 
                 document.getElementById('attackLogSection').innerHTML = `<b>Your battle log:<b><br>`
 
@@ -141,7 +172,7 @@ function createBattle() {
         console.log('Response JSON for created battleId is', createBattleResponseAsJson)
         if (createBattleResponseAsJson && createBattleResponseAsJson.battleId) {
             // Add battleId to the battle info
-            document.getElementById('battleId').innerHTML = createBattleResponseAsJson.battleId
+            document.getElementById('battleIdInfo').innerHTML = `(Your battleId is: <span id="battleId">${createBattleResponseAsJson.battleId}</span>)` 
             preparePlayerAndOpponentData(createBattleResponseAsJson.battleId)
 
         } else {

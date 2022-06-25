@@ -12,3 +12,29 @@ body {
 .headerslime {
     width: 2%
 }
+
+.monsters, #attackSectionPanel {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+}
+
+.monsterUnitImage {
+    width: 7em;
+}
+
+.defeated div {
+    color: red;
+}
+
+button {
+    font-size: 2em;
+}
+
+.monsterSelection {
+    font-size: 1.2em;
+}
+
+#battleId {
+    font-size: 0.9em;
+}
