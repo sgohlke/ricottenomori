@@ -1,4 +1,5 @@
 const ricotteAPIUrl='https://ricotte-api.deno.dev/'
+const availableMonsterImages = ['greenslime', 'jellyslime', 'punchbag', 'slime']
 
 function getPlayerMonsterId(player, unit) {
     return `${player.playerId}-${unit.joinNumber}`
@@ -41,6 +42,11 @@ function attack() {
 
                 if (attackResponseAsJson.playerOne) {
                     updateMonsterHP(attackResponseAsJson.playerOne)
+                }
+
+                // Add counterattack log
+                if (attackResponseAsJson.counterAttackUnits && attackResponseAsJson.counterAttackUnits.counterAttacker && attackResponseAsJson.counterAttackUnits.counterTarget) {
+                    document.getElementById('attackLogSection').innerHTML += `Opponent performs counterattack. Opponent monster ${attackResponseAsJson.counterAttackUnits.counterAttacker.joinNumber} attacks your monster ${ attackResponseAsJson.counterAttackUnits.counterTarget.joinNumber}<br>`
                 }
 
                 // Battle has ended
@@ -102,8 +108,15 @@ function displayBattleStatus(battleStatusAsNumber, winner = undefined) {
 
 function getImageForUnit(unit) {
     let unitImageHtml = '<img src='
+    let lowercaseUnitName = unit.name.toLowerCase()
+    console.log('lowercaseUnitName', lowercaseUnitName)
+    if (!availableMonsterImages.includes(lowercaseUnitName)) {
+        lowercaseUnitName = 'placeholder'
+        console.log('lowercaseUnitName fallback', lowercaseUnitName)
+    }
+
     if (unit && unit.name) {
-        unitImageHtml += `"${unit.name.toLowerCase()}.svg"`
+        unitImageHtml += `"img/${lowercaseUnitName}.svg"`
     }
     return unitImageHtml + 'class="monsterUnitImage"/>'
 }
