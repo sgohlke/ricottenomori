@@ -22,7 +22,7 @@ function attack() {
     const attackingUnit = document.querySelector('input[name="attacker"]:checked');
     const defendingUnit = document.querySelector('input[name="defender"]:checked');
     if (attackingUnit && defendingUnit) {
-        document.getElementById('attackLogSection').innerHTML += `Attacking oponent monster ${defendingUnit.value} with your monster ${attackingUnit.value}<br>`
+        document.getElementById('attackLogSection').innerHTML += `Attacking opponent monster ${defendingUnit.value} with your monster ${attackingUnit.value}<br>`
         const battleId = document.getElementById('battleId').innerHTML
         fetch( `${ricotteAPIUrl}attack/${battleId}/${attackingUnit.value}/${defendingUnit.value}`)
         .then( (attackResponse) => {
