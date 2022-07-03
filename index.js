@@ -10,7 +10,6 @@ function updateMonsterHP(player) {
     if (player && player.unitsInBattle) {
         for (const unit of player.unitsInBattle) {
             const playerMonsterId = getPlayerMonsterId(player, unit)
-            console.log('unit', unit, 'playerMonsterId', playerMonsterId)
             document.getElementById(`${playerMonsterId}-hp`).innerHTML = `HP: ${unit.inBattleStatus.hp}`
             if (unit.inBattleStatus.hp === 0) {
                 document.getElementById(`${playerMonsterId}-unit`).className = 'monsterUnit defeated'
@@ -109,10 +108,8 @@ function displayBattleStatus(battleStatusAsNumber, winner = undefined) {
 function getImageForUnit(unit) {
     let unitImageHtml = '<img src='
     let lowercaseUnitName = unit.name.toLowerCase()
-    console.log('lowercaseUnitName', lowercaseUnitName)
     if (!availableMonsterImages.includes(lowercaseUnitName)) {
         lowercaseUnitName = 'placeholder'
-        console.log('lowercaseUnitName fallback', lowercaseUnitName)
     }
 
     if (unit && unit.name) {
@@ -173,9 +170,6 @@ function preparePlayerAndOpponentData(battleId) {
 }
 
 function createBattle() {
-    // Create Battle
-    console.log('Clicked on createBattle')
-
     fetch( `${ricotteAPIUrl}createBattle`)
     .then( (createBattleResponse) => {
         console.log('Get response with battleId', createBattleResponse)
