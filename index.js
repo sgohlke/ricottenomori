@@ -113,7 +113,7 @@ function getImageForUnit(unit) {
     }
 
     if (unit && unit.name) {
-        unitImageHtml += `"img/${lowercaseUnitName}.svg"`
+        unitImageHtml += `"img/${lowercaseUnitName}.svg" alt="${lowercaseUnitName}"`
     }
     return unitImageHtml + 'class="monsterUnitImage"/>'
 }
