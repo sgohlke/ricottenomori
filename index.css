@@ -27,10 +27,14 @@ button {
     font-size: 2em;
 }
 
-.monsterSelection {
+.monsterSelection, b {
     font-size: 1.2em;
 }
 
 #battleId {
     font-size: 0.9em;
+}
+
+#links a {
+    padding-left: 10px;
 }
