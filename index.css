@@ -19,7 +19,7 @@ body {
     width: 7em;
 }
 
-.defeated div {
+.defeated div, #errorMessage {
     color: red;
 }
 
@@ -37,4 +37,17 @@ button {
 
 #links a {
     padding-left: 10px;
+}
+
+label {
+    width: 12%;
+    display: inline-block;
+}
+
+.hidden {
+    display: none
+}
+
+#successMessage {
+    color: lawngreen
 }

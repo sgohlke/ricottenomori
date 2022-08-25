@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Ricotte no Mori RPG Login">
+  <title>Ricotte no Mori RPG! Login</title>
+  <link rel="stylesheet" href="index.css">
+  <script src="login.js"></script>
+</head>
+<body>
+  <header>
+    <h1>Ricotte no Mori: Login</h1>
+  </header>
+  <main>
+    <article>
+      <section>
+        <span>You can login into your account by entering fitting information in the form below and click on <b>Login</b>.<br />
+          If you do not have an account you can create a new account <a href="register.html" target="_blank">here</a>.
+          <br />
+        </span><br />
+      </section>
+      <section>
+        <span id="successMessage"></span>
+        <span id="errorMessage"></span>
+      </section>
+      <section id="loginFields">
+        <label for="username">Username: </label>
+        <input type="text" id="username"><br />
+        <label for="password">Password: </label>
+        <input type="password" id="password"><br />
+      </section><br />
+      <section id="buttons">
+        <button id="loginButton" onclick="login()">Login</button>
+        <button onclick="window.close()">Close this window</button>
+      </section>
+    </article>
+  </main>
+</body>
+</html>
