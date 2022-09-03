@@ -1,20 +1,28 @@
 const ricotteAPIUrl='https://ricotte-api.deno.dev/'
 
 function login() {
+    console.log('calling login')
     const username = document.getElementById('username').value
     const password = document.getElementById('password').value
 
     if (username && password) {
+        console.log('calling fetch')
         fetch( `${ricotteAPIUrl}login/`, {
             method: 'POST',
             body: `{"username":"${username}","password":"${password}"}`
         })
         .then( (loginResponse) => {
+            console.log('calling loginResponse', loginResponse )
             return loginResponse.json()
         })
         .then( (loginResponseAsJson) => {
-            if (loginResponseAsJson && loginResponseAsJson.accessToken) {
-                document.cookie = `ricotte-ac=${loginResponseAsJson.accessToken}`
+            console.log('calling loginResponseAsJson', loginResponseAsJson )
+            if (loginResponseAsJson 
+                && loginResponseAsJson.name 
+                && loginResponseAsJson.userName 
+                && loginResponseAsJson.playerId 
+                && loginResponseAsJson.accessToken) {
+                document.cookie = `ricotte-pl=${JSON.stringify(loginResponseAsJson)}`
                 document.getElementById('successMessage').innerHTML = `Your login to your account <b>${username}</b> was successful. You can now create a new battle with it.`
                 document.getElementById('loginFields').classList.add('hidden')
                 document.getElementById('loginButton').classList.add('hidden')

@@ -1,5 +1,6 @@
 const ricotteAPIUrl='https://ricotte-api.deno.dev/'
 const availableMonsterImages = ['greenslime', 'jellyslime', 'punchbag', 'slime']
+let isCurrentBattleTutorialBattle = true
 
 function getPlayerMonsterId(player, unit) {
     return `${player.playerId}-${unit.joinNumber}`
@@ -169,8 +170,11 @@ function preparePlayerAndOpponentData(battleId) {
     }
 }
 
-function createBattle() {
-    fetch( `${ricotteAPIUrl}createBattle`)
+function createBattle(isTutorialBattle) {
+    isCurrentBattleTutorialBattle = isTutorialBattle
+    console.log(`Create battle with isTutorialBattle ${isCurrentBattleTutorialBattle}`)
+
+    fetch(getCreateBattleURL(isCurrentBattleTutorialBattle) )
     .then( (createBattleResponse) => {
         console.log('Get response with battleId', createBattleResponse)
         return createBattleResponse.json()
@@ -189,4 +193,8 @@ function createBattle() {
     .catch( (error) => {
         console.error('An error ocurred while creating a battle', error)
     })
+}
+
+function getCreateBattleURL(isTutorialBattle) {
+    return isTutorialBattle ? `${ricotteAPIUrl}createBattle` : `${ricotteAPIUrl}createUserBattle`
 }

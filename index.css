@@ -39,7 +39,7 @@ button {
     padding-left: 10px;
 }
 
-label {
+.formlabel {
     width: 12%;
     display: inline-block;
 }
