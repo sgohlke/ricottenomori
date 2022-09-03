@@ -1,22 +1,18 @@
 const ricotteAPIUrl='https://ricotte-api.deno.dev/'
 
 function login() {
-    console.log('calling login')
     const username = document.getElementById('username').value
     const password = document.getElementById('password').value
 
     if (username && password) {
-        console.log('calling fetch')
         fetch( `${ricotteAPIUrl}login/`, {
             method: 'POST',
             body: `{"username":"${username}","password":"${password}"}`
         })
         .then( (loginResponse) => {
-            console.log('calling loginResponse', loginResponse )
             return loginResponse.json()
         })
         .then( (loginResponseAsJson) => {
-            console.log('calling loginResponseAsJson', loginResponseAsJson )
             if (loginResponseAsJson 
                 && loginResponseAsJson.name 
                 && loginResponseAsJson.userName 
