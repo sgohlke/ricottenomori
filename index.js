@@ -1,6 +1,7 @@
 const ricotteAPIUrl='https://ricotte-api.deno.dev/'
 const availableMonsterImages = ['greenslime', 'jellyslime', 'punchbag', 'slime']
 let isCurrentBattleTutorialBattle = true
+let currentPlayer;
 
 function getPlayerMonsterId(player, unit) {
     return `${player.playerId}-${unit.joinNumber}`
@@ -25,7 +26,7 @@ function attack() {
     if (attackingUnit && defendingUnit) {
         document.getElementById('attackLogSection').innerHTML += `Attacking opponent monster ${defendingUnit.value} with your monster ${attackingUnit.value}<br>`
         const battleId = document.getElementById('battleId').innerHTML
-        fetch( `${ricotteAPIUrl}attack/${battleId}/${attackingUnit.value}/${defendingUnit.value}`)
+        fetch( `${ricotteAPIUrl}attack/${battleId}/${attackingUnit.value}/${defendingUnit.value}`,  createRequestOptions())
         .then( (attackResponse) => {
             console.log('Get attacking response with battle', attackResponse)
             return attackResponse.json()
@@ -138,7 +139,7 @@ function displayMonsters(player) {
 
 function preparePlayerAndOpponentData(battleId) {
     if (battleId) {
-        fetch( `${ricotteAPIUrl}getBattle/${battleId}`)
+        fetch( `${ricotteAPIUrl}getBattle/${battleId}`, createRequestOptions())
         .then( (getBattleResponse) => {
             console.log('Get response with battle', getBattleResponse)
             return getBattleResponse.json()
@@ -171,30 +172,76 @@ function preparePlayerAndOpponentData(battleId) {
 }
 
 function createBattle(isTutorialBattle) {
+    document.getElementById('errorMessage').innerHTML = ''
     isCurrentBattleTutorialBattle = isTutorialBattle
     console.log(`Create battle with isTutorialBattle ${isCurrentBattleTutorialBattle}`)
 
-    fetch(getCreateBattleURL(isCurrentBattleTutorialBattle) )
-    .then( (createBattleResponse) => {
-        console.log('Get response with battleId', createBattleResponse)
-        return createBattleResponse.json()
-    })
-    .then( (createBattleResponseAsJson) => {
-        console.log('Response JSON for created battleId is', createBattleResponseAsJson)
-        if (createBattleResponseAsJson && createBattleResponseAsJson.battleId) {
-            // Add battleId to the battle info
-            document.getElementById('battleIdInfo').innerHTML = `(Your battleId is: <span id="battleId">${createBattleResponseAsJson.battleId}</span>)` 
-            preparePlayerAndOpponentData(createBattleResponseAsJson.battleId)
-
-        } else {
-            console.error('Cannot extract battleId from createBattleResponseAsJson', createBattleResponseAsJson)
+    if (!isCurrentBattleTutorialBattle) {
+        try {
+            currentPlayer = extractPlayerFromCookie()
+            if(!currentPlayer) {
+                document.getElementById('errorMessage').innerHTML = 'Creating battle failed. Please login and try again!'
+                return;
+            }
+        } catch (error) {
+            document.getElementById('errorMessage').innerHTML = `An error occured while trying to get user data. Error is: ${error.message}`
+            return;
         }
-    })
-    .catch( (error) => {
-        console.error('An error ocurred while creating a battle', error)
-    })
+    }
+
+    const createBattleURL = getCreateBattleURL(isCurrentBattleTutorialBattle);
+    if (!createBattleURL) {
+        document.getElementById('errorMessage').innerHTML = 'Creating battle failed. Creating battleURL failed!'
+    } else {
+        fetch( createBattleURL, createRequestOptions() )
+        .then( (createBattleResponse) => {
+            console.log('Get response with battleId', createBattleResponse)
+            return createBattleResponse.json()
+        })
+        .then( (createBattleResponseAsJson) => {
+            console.log('Response JSON for created battleId is', createBattleResponseAsJson)
+            if (createBattleResponseAsJson && createBattleResponseAsJson.battleId) {
+                // Add battleId to the battle info
+                document.getElementById('battleIdInfo').innerHTML = `(Your battleId is: <span id="battleId">${createBattleResponseAsJson.battleId}</span>)` 
+                preparePlayerAndOpponentData(createBattleResponseAsJson.battleId)
+    
+            } else {
+                console.error('Cannot extract battleId from createBattleResponseAsJson', createBattleResponseAsJson)
+            }
+        })
+        .catch( (error) => {
+            console.error('An error ocurred while creating a battle', error)
+        })
+    }    
 }
 
 function getCreateBattleURL(isTutorialBattle) {
-    return isTutorialBattle ? `${ricotteAPIUrl}createBattle` : `${ricotteAPIUrl}createUserBattle`
+    if (isTutorialBattle) {
+        return `${ricotteAPIUrl}createBattle`
+    } else if (currentPlayer && currentPlayer.playerId)  {
+        return `${ricotteAPIUrl}createUserBattle/${currentPlayer.playerId}`
+    } else {
+        return undefined
+    }
+}
+
+function extractPlayerFromCookie() {
+    const playerCookie = document.cookie
+    .split('; ')
+    .find((row) => row.startsWith('ricotte-pl='))
+    ?.split('=')[1];
+    console.log('PlayerCookie is ' + playerCookie )
+    return JSON.parse(playerCookie)
+}
+
+function createRequestOptions() {
+    if (!isCurrentBattleTutorialBattle && currentPlayer && currentPlayer.accessToken) {
+        return {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${currentPlayer.accessToken}`,
+              }
+        }
+    }
+    return { method: 'GET'}
 }
