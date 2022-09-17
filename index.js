@@ -1,7 +1,48 @@
-const ricotteAPIUrl='https://ricotte-api.deno.dev/'
+const ricotteAPIUrl = 'https://ricotte-api.deno.dev/'
 const availableMonsterImages = ['greenslime', 'jellyslime', 'punchbag', 'slime']
 let isCurrentBattleTutorialBattle = true
 let currentPlayer;
+
+function checkIfPlayerIsAvaliable() {
+    currentPlayer = extractPlayerFromCookie()
+    const elementsToDisplayWhenLoggedIn = document.getElementsByClassName('onlyloggedin');
+
+    for (const element of elementsToDisplayWhenLoggedIn) {
+        if (currentPlayer && currentPlayer.playerId) {
+            element.classList.remove('hidden')
+        } else {
+            element.classList.add('hidden')
+        }
+    }
+
+    const elementsToDisplayWhenLoggedOut = document.getElementsByClassName('onlyloggedout');
+    for (const element of elementsToDisplayWhenLoggedOut) {
+        if (currentPlayer && currentPlayer.playerId) {
+            element.classList.add('hidden')
+        } else {
+            element.classList.remove('hidden')
+        }
+    }
+
+    const elementsToDisplayWhenLoggedInPlayerBattle = document.getElementsByClassName('onlyloggedInForPlayerBattle');
+    for (const element of elementsToDisplayWhenLoggedInPlayerBattle) {
+        if ((currentPlayer && currentPlayer.playerId) || isCurrentBattleTutorialBattle) {
+            element.classList.remove('hidden')
+        } else {
+            element.classList.add('hidden')
+        }
+    }
+}
+
+document.addEventListener('visibilitychange', checkIfPlayerIsAvaliable);
+
+function logout() {
+    if (document.cookie) {
+        document.cookie = document.cookie + "; expires=Thu, 01 Jan 1970 00:00:00 UTC"
+    }
+    checkIfPlayerIsAvaliable();
+    return false;
+}
 
 function getPlayerMonsterId(player, unit) {
     return `${player.playerId}-${unit.joinNumber}`
@@ -15,7 +56,7 @@ function updateMonsterHP(player) {
             document.getElementById(`${playerMonsterId}-hp`).innerHTML = `HP: ${unit.inBattleStatus.hp}`
             if (unit.inBattleStatus.hp === 0) {
                 document.getElementById(`${playerMonsterId}-unit`).className = 'monsterUnit defeated'
-            } 
+            }
         }
     }
 }
@@ -26,42 +67,40 @@ function attack() {
     if (attackingUnit && defendingUnit) {
         document.getElementById('attackLogSection').innerHTML += `Attacking opponent monster ${defendingUnit.value} with your monster ${attackingUnit.value}<br>`
         const battleId = document.getElementById('battleId').innerHTML
-        fetch( `${ricotteAPIUrl}attack/${battleId}/${attackingUnit.value}/${defendingUnit.value}`,  createRequestOptions())
-        .then( (attackResponse) => {
-            console.log('Get attacking response with battle', attackResponse)
-            return attackResponse.json()
-        })
-        .then( (attackResponseAsJson) => {
-            console.log('Response JSON for attack battle is', attackResponseAsJson)
-            // Refresh battle!
-            if (attackResponseAsJson.error) {
-                document.getElementById('attackLogSection').innerHTML += `Attack failed with error: ${JSON.stringify(attackResponseAsJson.error)}<br>`
-            } else if (attackResponseAsJson.playerOne && attackResponseAsJson.playerTwo) {
-                if (attackResponseAsJson.playerTwo) {
-                    updateMonsterHP(attackResponseAsJson.playerTwo)
-                }
+        fetch(`${ricotteAPIUrl}attack/${battleId}/${attackingUnit.value}/${defendingUnit.value}`, createRequestOptions())
+            .then((attackResponse) => {
+                console.log('Get attacking response with battle', attackResponse)
+                return attackResponse.json()
+            })
+            .then((attackResponseAsJson) => {
+                console.log('Response JSON for attack battle is', attackResponseAsJson)
+                // Refresh battle!
+                if (attackResponseAsJson.error) {
+                    document.getElementById('attackLogSection').innerHTML += `Attack failed with error: ${JSON.stringify(attackResponseAsJson.error)}<br>`
+                } else if (attackResponseAsJson.playerOne && attackResponseAsJson.playerTwo) {
+                    if (attackResponseAsJson.playerTwo) {
+                        updateMonsterHP(attackResponseAsJson.playerTwo)
+                    }
 
-                if (attackResponseAsJson.playerOne) {
-                    updateMonsterHP(attackResponseAsJson.playerOne)
-                }
+                    if (attackResponseAsJson.playerOne) {
+                        updateMonsterHP(attackResponseAsJson.playerOne)
+                    }
 
-                // Add counterattack log
-                if (attackResponseAsJson.counterAttackUnits && attackResponseAsJson.counterAttackUnits.counterAttacker && attackResponseAsJson.counterAttackUnits.counterTarget) {
-                    document.getElementById('attackLogSection').innerHTML += `Opponent performs counterattack. Opponent monster ${attackResponseAsJson.counterAttackUnits.counterAttacker.joinNumber} attacks your monster ${ attackResponseAsJson.counterAttackUnits.counterTarget.joinNumber}<br>`
-                }
+                    // Add counterattack log
+                    if (attackResponseAsJson.counterAttackUnits && attackResponseAsJson.counterAttackUnits.counterAttacker && attackResponseAsJson.counterAttackUnits.counterTarget) {
+                        document.getElementById('attackLogSection').innerHTML += `Opponent performs counterattack. Opponent monster ${attackResponseAsJson.counterAttackUnits.counterAttacker.joinNumber} attacks your monster ${attackResponseAsJson.counterAttackUnits.counterTarget.joinNumber}<br>`
+                    }
 
-                // Battle has ended
-                if (attackResponseAsJson.battleStatus && attackResponseAsJson.battleStatus === 1 && attackResponseAsJson.battleWinner ) {
-                   document.getElementById('battleStatusSection').innerHTML = `<h2>Battle Status:</h2> ${displayBattleStatus(attackResponseAsJson.battleStatus, attackResponseAsJson.battleWinner)}`
-                   document.getElementById('attackSection').innerHTML = ''
+                    // Battle has ended
+                    if (attackResponseAsJson.battleStatus && attackResponseAsJson.battleStatus === 1 && attackResponseAsJson.battleWinner) {
+                        document.getElementById('battleStatusSection').innerHTML = `<h2>Battle Status:</h2> ${displayBattleStatus(attackResponseAsJson.battleStatus, attackResponseAsJson.battleWinner)}`
+                        document.getElementById('attackSection').innerHTML = ''
+                    }
                 }
-            }
-        })
-        .catch( (error) => {
-            console.error('An error ocurred while creating a battle', error)
-        })
-    
-    
+            })
+            .catch((error) => {
+                console.error('An error ocurred while creating a battle', error)
+            })
     } else if (attackingUnit) {
         document.getElementById('attackLogSection').innerHTML += "Please select a defending monster!<br>"
     } else if (defendingUnit) {
@@ -83,7 +122,6 @@ function createAttackSection(player, opponent) {
     }
 
     attackSectionHTML += '</div>'
-
     if (opponent && opponent.unitsInBattle) {
         attackSectionHTML += '<div><span>Defending unit (opponent)</span><br>'
         for (const unit of opponent.unitsInBattle) {
@@ -91,7 +129,6 @@ function createAttackSection(player, opponent) {
             <label for="defender${unit.joinNumber}"> ${unit.joinNumber}-${unit.name}</label></div>`
         }
     }
-
     attackSectionHTML += '</div><button id="attackButton" onclick="attack()">Attack</button></div>'
     return attackSectionHTML
 }
@@ -101,7 +138,7 @@ function displayBattleStatus(battleStatusAsNumber, winner = undefined) {
         case 0:
             return "ACTIVE"
         case 1:
-            return `ENDED - The winner is: ${winner.name}` 
+            return `ENDED - The winner is: ${winner.name}`
         default:
             return "UNKNOWN"
     }
@@ -121,7 +158,7 @@ function getImageForUnit(unit) {
 }
 
 function isUnitDefeated(unit) {
-    return  unit && unit.inBattleStatus.hp === 0 ? ' defeated' : ''
+    return unit && unit.inBattleStatus.hp === 0 ? ' defeated' : ''
 }
 
 function displayMonsters(player) {
@@ -129,9 +166,8 @@ function displayMonsters(player) {
         let playerHTML = '<section class="monsters">'
         for (const unit of player.unitsInBattle) {
             const playerMonsterId = getPlayerMonsterId(player, unit)
-            playerHTML += `<div id="${playerMonsterId}-unit" class="monsterUnit${isUnitDefeated(unit)}"> ${getImageForUnit(unit)} <div id="${playerMonsterId}-name" class="monsterUnitName">Name: ${unit.name}</div><div id="${playerMonsterId}-hp" class="monsterUnitHP">HP: ${unit.inBattleStatus.hp}</div><div id="${playerMonsterId}-atk" class="monsterUnitATK">ATK: ${unit.inBattleStatus.atk}</div><div id="${playerMonsterId}-def" class="monsterUnitDEF">DEF: ${unit.inBattleStatus.def}</div></div><br>` 
+            playerHTML += `<div id="${playerMonsterId}-unit" class="monsterUnit${isUnitDefeated(unit)}"> ${getImageForUnit(unit)} <div id="${playerMonsterId}-name" class="monsterUnitName">Name: ${unit.name}</div><div id="${playerMonsterId}-hp" class="monsterUnitHP">HP: ${unit.inBattleStatus.hp}</div><div id="${playerMonsterId}-atk" class="monsterUnitATK">ATK: ${unit.inBattleStatus.atk}</div><div id="${playerMonsterId}-def" class="monsterUnitDEF">DEF: ${unit.inBattleStatus.def}</div></div><br>`
         }
-
         playerHTML += '</section>'
         return playerHTML
     }
@@ -139,47 +175,45 @@ function displayMonsters(player) {
 
 function preparePlayerAndOpponentData(battleId) {
     if (battleId) {
-        fetch( `${ricotteAPIUrl}getBattle/${battleId}`, createRequestOptions())
-        .then( (getBattleResponse) => {
-            console.log('Get response with battle', getBattleResponse)
-            return getBattleResponse.json()
-        })
-        .then( (getBattleResponseAsJson) => {
-            console.log('Response JSON for created battle is', getBattleResponseAsJson)
-            if (getBattleResponseAsJson) {
-                if (getBattleResponseAsJson.battleStatus !== undefined ) {
-                    document.getElementById('battleStatusSection').innerHTML = `<h2>Battle Status:</h2> ${displayBattleStatus(getBattleResponseAsJson.battleStatus)}`
+        fetch(`${ricotteAPIUrl}getBattle/${battleId}`, createRequestOptions())
+            .then((getBattleResponse) => {
+                console.log('Get response with battle', getBattleResponse)
+                return getBattleResponse.json()
+            })
+            .then((getBattleResponseAsJson) => {
+                console.log('Response JSON for created battle is', getBattleResponseAsJson)
+                if (getBattleResponseAsJson) {
+                    if (getBattleResponseAsJson.battleStatus !== undefined) {
+                        document.getElementById('battleStatusSection').innerHTML = `<h2>Battle Status:</h2> ${displayBattleStatus(getBattleResponseAsJson.battleStatus)}`
+                    }
+
+                    if (getBattleResponseAsJson.playerTwo) {
+                        document.getElementById('opponentSection').innerHTML = `<h2>Your opponents monsters:</h2> ${displayMonsters(getBattleResponseAsJson.playerTwo)}`
+                    }
+
+                    if (getBattleResponseAsJson.playerOne) {
+                        document.getElementById('playerSection').innerHTML = `<h2>Your monsters:</h2> ${displayMonsters(getBattleResponseAsJson.playerOne)}`
+                    }
+
+                    document.getElementById('attackSection').innerHTML = `<h2>Battle Actions:</h2>  ${createAttackSection(getBattleResponseAsJson.playerOne, getBattleResponseAsJson.playerTwo)}`
+                    document.getElementById('attackLogSection').innerHTML = `<b>Your battle log:<b><br>`
                 }
-
-                if (getBattleResponseAsJson.playerTwo) {
-                    document.getElementById('opponentSection').innerHTML = `<h2>Your opponents monsters:</h2> ${displayMonsters(getBattleResponseAsJson.playerTwo)}`
-                }
-
-                if (getBattleResponseAsJson.playerOne) {
-                    document.getElementById('playerSection').innerHTML = `<h2>Your monsters:</h2> ${displayMonsters(getBattleResponseAsJson.playerOne)}`
-                }
-
-                document.getElementById('attackSection').innerHTML = `<h2>Battle Actions:</h2>  ${createAttackSection(getBattleResponseAsJson.playerOne, getBattleResponseAsJson.playerTwo)}` 
-
-                document.getElementById('attackLogSection').innerHTML = `<b>Your battle log:<b><br>`
-
-            }
-        })
-        .catch( (error) => {
-            console.error('An error ocurred while fetching the battle data for battleId', battleId , error)
-        })
+            })
+            .catch((error) => {
+                console.error('An error ocurred while fetching the battle data for battleId', battleId, error)
+            })
     }
 }
 
 function createBattle(isTutorialBattle) {
     document.getElementById('errorMessage').innerHTML = ''
     isCurrentBattleTutorialBattle = isTutorialBattle
+    checkIfPlayerIsAvaliable()
     console.log(`Create battle with isTutorialBattle ${isCurrentBattleTutorialBattle}`)
-
     if (!isCurrentBattleTutorialBattle) {
         try {
             currentPlayer = extractPlayerFromCookie()
-            if(!currentPlayer) {
+            if (!currentPlayer) {
                 document.getElementById('errorMessage').innerHTML = 'Creating battle failed. Please login and try again!'
                 return;
             }
@@ -193,32 +227,32 @@ function createBattle(isTutorialBattle) {
     if (!createBattleURL) {
         document.getElementById('errorMessage').innerHTML = 'Creating battle failed. Creating battleURL failed!'
     } else {
-        fetch( createBattleURL, createRequestOptions() )
-        .then( (createBattleResponse) => {
-            console.log('Get response with battleId', createBattleResponse)
-            return createBattleResponse.json()
-        })
-        .then( (createBattleResponseAsJson) => {
-            console.log('Response JSON for created battleId is', createBattleResponseAsJson)
-            if (createBattleResponseAsJson && createBattleResponseAsJson.battleId) {
-                // Add battleId to the battle info
-                document.getElementById('battleIdInfo').innerHTML = `(Your battleId is: <span id="battleId">${createBattleResponseAsJson.battleId}</span>)` 
-                preparePlayerAndOpponentData(createBattleResponseAsJson.battleId)
-    
-            } else {
-                console.error('Cannot extract battleId from createBattleResponseAsJson', createBattleResponseAsJson)
-            }
-        })
-        .catch( (error) => {
-            console.error('An error ocurred while creating a battle', error)
-        })
-    }    
+        fetch(createBattleURL, createRequestOptions())
+            .then((createBattleResponse) => {
+                console.log('Get response with battleId', createBattleResponse)
+                return createBattleResponse.json()
+            })
+            .then((createBattleResponseAsJson) => {
+                console.log('Response JSON for created battleId is', createBattleResponseAsJson)
+                if (createBattleResponseAsJson && createBattleResponseAsJson.battleId) {
+                    // Add battleId to the battle info
+                    document.getElementById('battleIdInfo').innerHTML = `(Your battleId is: <span id="battleId">${createBattleResponseAsJson.battleId}</span>)`
+                    preparePlayerAndOpponentData(createBattleResponseAsJson.battleId)
+
+                } else {
+                    console.error('Cannot extract battleId from createBattleResponseAsJson', createBattleResponseAsJson)
+                }
+            })
+            .catch((error) => {
+                console.error('An error ocurred while creating a battle', error)
+            })
+    }
 }
 
 function getCreateBattleURL(isTutorialBattle) {
     if (isTutorialBattle) {
         return `${ricotteAPIUrl}createBattle`
-    } else if (currentPlayer && currentPlayer.playerId)  {
+    } else if (currentPlayer && currentPlayer.playerId) {
         return `${ricotteAPIUrl}createUserBattle/${currentPlayer.playerId}`
     } else {
         return undefined
@@ -226,12 +260,17 @@ function getCreateBattleURL(isTutorialBattle) {
 }
 
 function extractPlayerFromCookie() {
-    const playerCookie = document.cookie
-    .split('; ')
-    .find((row) => row.startsWith('ricotte-pl='))
-    ?.split('=')[1];
-    console.log('PlayerCookie is ' + playerCookie )
-    return JSON.parse(playerCookie)
+    const playerCookie = document.cookie?.split('=')[1];
+    console.log('PlayerCookie is ' + playerCookie)
+    if (playerCookie) {
+        try {
+            const parsedPlayerCookie = JSON.parse(playerCookie)
+            return parsedPlayerCookie
+        } catch (error) {
+            console.error('An error ocurred while parsing the player token', error.message)
+        }
+    }
+    return undefined
 }
 
 function createRequestOptions() {
@@ -240,8 +279,8 @@ function createRequestOptions() {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${currentPlayer.accessToken}`,
-              }
+            }
         }
     }
-    return { method: 'GET'}
+    return { method: 'GET' }
 }

@@ -1,45 +1,50 @@
 <!DOCTYPE html>
 <html lang="de">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Ricotte no Mori RPG">
-    <title>Ricotte no Mori RPG!</title>
-    <link rel="stylesheet" href="index.css">
-    <script src="index.js"></script>
-  </head>
-  <body>
-    <header>
-      <h1>Ricotte no Mori</h1>
-    </header>
-    <main>
-      <article>
-        <section>
-          <h2>Welcome to the fantastic world of Ricotte no Mori!</h2>
-          <span>Start your adventure in the forest of Ricotte. Join monster battles against your enemys and be victorious!</span><br /><br />
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Ricotte no Mori RPG">
+  <title>Ricotte no Mori RPG!</title>
+  <link rel="stylesheet" href="index.css">
+  <script src="index.js"></script>
+</head>
+
+<body onload="checkIfPlayerIsAvaliable()">
+  <header>
+    <h1>Ricotte no Mori</h1>
+  </header>
+  <main>
+    <article>
+      <section>
+        <h2>Welcome to the fantastic world of Ricotte no Mori!</h2>
+        <span>Start your adventure in the forest of Ricotte. Join monster battles against your enemys and be
+          victorious!</span><br /><br />
+      </section>
+      <section id="links">
+        <h2>Links</h2>
+        <a href="story.html" target="_blank">Story</a>
+        <a href="howtoplay.html" target="_blank">How to play</a>
+        <a class="onlyloggedout hidden" href="register.html" target="_blank">Register new account</a>
+        <a class="onlyloggedout hidden" href="login.html" target="_blank">Login</a>
+        <a class="onlyloggedin hidden" href="#" onclick="return logout()">Logout</a>
+      </section>
+      <section>
+        <h2>Start the game!?</h2>
+        <button onclick="createBattle(true)">Create Tutorial Battle</button>
+        <button class="onlyloggedin hidden" onclick="createBattle(false)">Create User Battle</button><br /><br />
+        <span class="onlyloggedInForPlayerBattle hidden" id="battleIdInfo"></span><br /><br />
+        <span class="onlyloggedInForPlayerBattle hidden" id="errorMessage"></span><br /><br />
+        <section class="onlyloggedInForPlayerBattle hidden" id="battleSection">
+          <section id="battleStatusSection"></section><br />
+          <section id="opponentSection"></section><br />
+          <section id="playerSection"></section><br />
+          <section id="attackSection"></section><br />
+          <section id="attackLogSection"></section><br />
         </section>
-        <section id="links">
-          <h2>Links</h2>
-          <a href="story.html" target="_blank">Story</a>
-          <a href="howtoplay.html" target="_blank">How to play</a>
-          <a href="register.html" target="_blank">Register new account</a>
-          <a href="login.html" target="_blank">Login</a>
-        </section>
-        <section>
-            <h2>Start the game!?</h2>
-            <button onclick="createBattle(true)">Create Tutorial Battle</button> 
-            <button onclick="createBattle(false)">Create User Battle</button><br /><br />
-            <span id="battleIdInfo"></span><br /><br />
-            <span id="errorMessage"></span><br /><br />
-            <section id="battleSection">
-              <section id="battleStatusSection"></section><br />
-              <section id="opponentSection"></section><br />
-              <section id="playerSection"></section><br />
-              <section id="attackSection"></section><br />
-              <section id="attackLogSection"></section><br />
-            </section>
-        </section>
-      </article>
-    </main>
-  </body>
+      </section>
+    </article>
+  </main>
+</body>
+
 </html>

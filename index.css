@@ -9,7 +9,8 @@ body {
     width: 2%
 }
 
-.monsters, #attackSectionPanel {
+.monsters,
+#attackSectionPanel {
     display: flex;
     flex-direction: row;
     justify-content: space-evenly;
@@ -19,7 +20,8 @@ body {
     width: 7em;
 }
 
-.defeated div, #errorMessage {
+.defeated div,
+#errorMessage {
     color: red;
 }
 
@@ -27,7 +29,8 @@ button {
     font-size: 2em;
 }
 
-.monsterSelection, b {
+.monsterSelection,
+b {
     font-size: 1.2em;
 }
 
