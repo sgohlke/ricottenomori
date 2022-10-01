@@ -3,7 +3,9 @@ const availableMonsterImages = ['greenslime', 'jellyslime', 'punchbag', 'slime']
 let isCurrentBattleTutorialBattle = true
 let currentPlayer;
 
-function checkIfPlayerIsAvaliable() {
+async function checkIfPlayerIsAvaliable() {
+    const cookies = await window.cookieStore.getAll();
+    console.log('Test cookies', cookies)
     currentPlayer = extractPlayerFromCookie()
     const elementsToDisplayWhenLoggedIn = document.getElementsByClassName('onlyloggedin');
 
