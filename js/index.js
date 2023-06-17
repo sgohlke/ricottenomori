@@ -95,7 +95,7 @@ function attack() {
 
                     // Battle has ended
                     if (attackResponseAsJson.battleStatus && attackResponseAsJson.battleStatus === 1 && attackResponseAsJson.battleWinner) {
-                        document.getElementById('battleStatusSection').innerHTML = `<h2>Battle Status:</h2> ${displayBattleStatus(attackResponseAsJson.battleStatus, attackResponseAsJson.battleWinner)}`
+                        document.getElementById('battleStatusSection').innerHTML = `<span>Battle Status: ${displayBattleStatus(attackResponseAsJson.battleStatus, attackResponseAsJson.battleWinner)}</span><br>`
                         document.getElementById('attackSection').innerHTML = ''
                     }
                 }
@@ -168,7 +168,8 @@ function displayMonsters(player) {
         let playerHTML = '<section class="monsters">'
         for (const unit of player.unitsInBattle) {
             const playerMonsterId = getPlayerMonsterId(player, unit)
-            playerHTML += `<div id="${playerMonsterId}-unit" class="monsterUnit${isUnitDefeated(unit)}"> ${getImageForUnit(unit)} <div id="${playerMonsterId}-name" class="monsterUnitName">Name: ${unit.name}</div><div id="${playerMonsterId}-hp" class="monsterUnitHP">HP: ${unit.inBattleStatus.hp}</div><div id="${playerMonsterId}-atk" class="monsterUnitATK">ATK: ${unit.inBattleStatus.atk}</div><div id="${playerMonsterId}-def" class="monsterUnitDEF">DEF: ${unit.inBattleStatus.def}</div></div><br>`
+            const monsterInfoInTooltip = `Monster info: Name: ${unit.name} Max HP: ${unit.defaultStatus.hp} ATK: ${unit.inBattleStatus.atk} DEF: ${unit.inBattleStatus.def}`
+            playerHTML += `<div id="${playerMonsterId}-unit" title="${monsterInfoInTooltip}" class="monsterUnit${isUnitDefeated(unit)}"> ${getImageForUnit(unit)} <br><span id="${playerMonsterId}-entry"> <span id="${playerMonsterId}-name" class="monsterUnitName">${unit.name}</span>   (<span id="${playerMonsterId}-hp" class="monsterUnitHP">${unit.inBattleStatus.hp}</span>/<span id="${playerMonsterId}-defaulthp" class="monsterUnitDefaultHP">${unit.defaultStatus.hp}</span>)</span></div><br>`
         }
         playerHTML += '</section>'
         return playerHTML
@@ -186,18 +187,18 @@ function preparePlayerAndOpponentData(battleId) {
                 console.log('Response JSON for created battle is', getBattleResponseAsJson)
                 if (getBattleResponseAsJson) {
                     if (getBattleResponseAsJson.battleStatus !== undefined) {
-                        document.getElementById('battleStatusSection').innerHTML = `<h2>Battle Status:</h2> ${displayBattleStatus(getBattleResponseAsJson.battleStatus)}`
+                        document.getElementById('battleStatusSection').innerHTML = `<span>Battle Status: ${displayBattleStatus(getBattleResponseAsJson.battleStatus)}</span><br>`
                     }
 
                     if (getBattleResponseAsJson.playerTwo) {
-                        document.getElementById('opponentSection').innerHTML = `<h2>Your opponents monsters:</h2> ${displayMonsters(getBattleResponseAsJson.playerTwo)}`
+                        document.getElementById('opponentSection').innerHTML = `<div>Your opponents monsters:</div><br> ${displayMonsters(getBattleResponseAsJson.playerTwo)}`
                     }
 
                     if (getBattleResponseAsJson.playerOne) {
-                        document.getElementById('playerSection').innerHTML = `<h2>Your monsters:</h2> ${displayMonsters(getBattleResponseAsJson.playerOne)}`
+                        document.getElementById('playerSection').innerHTML = `<div>Your monsters:</div><br> ${displayMonsters(getBattleResponseAsJson.playerOne)}`
                     }
 
-                    document.getElementById('attackSection').innerHTML = `<h2>Battle Actions:</h2>  ${createAttackSection(getBattleResponseAsJson.playerOne, getBattleResponseAsJson.playerTwo)}`
+                    document.getElementById('attackSection').innerHTML = `<div>Battle Actions:</div><br>  ${createAttackSection(getBattleResponseAsJson.playerOne, getBattleResponseAsJson.playerTwo)}`
                     document.getElementById('attackLogSection').innerHTML = `<b>Your battle log:<b><br>`
                 }
             })
@@ -238,7 +239,7 @@ function createBattle(isTutorialBattle) {
                 console.log('Response JSON for created battleId is', createBattleResponseAsJson)
                 if (createBattleResponseAsJson && createBattleResponseAsJson.battleId) {
                     // Add battleId to the battle info
-                    document.getElementById('battleIdInfo').innerHTML = `(Your battleId is: <span id="battleId">${createBattleResponseAsJson.battleId}</span>)`
+                    document.getElementById('battleIdInfo').innerHTML = `<br>(Your battleId is: <span id="battleId">${createBattleResponseAsJson.battleId}</span>)`
                     preparePlayerAndOpponentData(createBattleResponseAsJson.battleId)
 
                 } else {

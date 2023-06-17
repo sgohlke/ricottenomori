@@ -13,20 +13,28 @@ body {
 #attackSectionPanel {
     display: flex;
     flex-direction: row;
-    justify-content: space-evenly;
+    justify-content: flex-start;
+}
+
+.monsters div,
+#attackSectionPanel div {
+    margin-right: 2%;
 }
 
 .monsterUnitImage {
     width: 7em;
 }
 
-.defeated div,
+.defeated span,
 #errorMessage {
     color: red;
 }
 
 button {
-    font-size: 2em;
+    font-size: 1.2em;
+    border-radius: 4px;
+    background-color: #058aff;
+    border-color: #058aff;
 }
 
 .monsterSelection,
@@ -40,6 +48,8 @@ b {
 
 #links a {
     padding-left: 10px;
+    font-size: 1.2em;
+    color: #085aff;
 }
 
 .formlabel {
