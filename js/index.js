@@ -199,7 +199,9 @@ function preparePlayerAndOpponentData(battleId) {
                     }
 
                     document.getElementById('attackSection').innerHTML = `<div>Battle Actions:</div><br>  ${createAttackSection(getBattleResponseAsJson.playerOne, getBattleResponseAsJson.playerTwo)}`
+                    document.getElementById('showBattleLogsButton').classList.remove('hidden')
                     document.getElementById('attackLogSection').innerHTML = `<b>Your battle log:<b><br>`
+                    
                 }
             })
             .catch((error) => {
@@ -286,4 +288,9 @@ function createRequestOptions() {
         }
     }
     return { method: 'GET' }
+}
+
+function showBattleLogs() {
+    document.getElementById('attackLogSection').classList.remove('hidden')
+    document.getElementById('showBattleLogsButton').classList.add('hidden')
 }
