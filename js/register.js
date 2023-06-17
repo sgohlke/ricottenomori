@@ -1,5 +1,3 @@
-const ricotteAPIUrl='https://ricotte-api.deno.dev/'
-
 function register() {
     const playername = document.getElementById('playername').value
     const username = document.getElementById('username').value
@@ -19,7 +17,6 @@ function register() {
                 document.getElementById('successMessage').innerHTML = `Your account for user <b>${username}</b> was successfully created. You can now login with the provided username and password.`
                 document.getElementById('registerFields').classList.add('hidden')
                 document.getElementById('registerButton').classList.add('hidden')
-                setTimeout(window.close, 5000);
             } else if (registerResponseAsJson && registerResponseAsJson.error) {
                 document.getElementById('errorMessage').innerHTML = `An error occured while creating an account for user  <b>${username}</b>. Error is:<br /><b>${registerResponseAsJson.error}</b>`
             }

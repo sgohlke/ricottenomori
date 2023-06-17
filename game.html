@@ -1,0 +1,13 @@
+<h2>Start the game!?</h2>
+<button onclick="createBattle(true)">Create Tutorial Battle</button>
+<button class="onlyloggedin hidden" onclick="createBattle(false)">Create User Battle</button>
+<span class="onlyloggedInForPlayerBattle hidden" id="battleIdInfo"></span>
+<span class="onlyloggedInForPlayerBattle hidden" id="errorMessage"></span>
+<section class="onlyloggedInForPlayerBattle hidden" id="battleSection">
+    <section id="battleStatusSection"></section><br />
+    <section id="opponentSection"></section><br />
+    <section id="playerSection"></section><br />
+    <section id="attackSection"></section><br />
+    <button id="showBattleLogsButton" class="hidden" onclick="showBattleLogs()">Show battle logs</button>
+    <section id="attackLogSection" class="hidden"></section><br />
+</section>

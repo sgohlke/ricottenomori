@@ -1,5 +1,3 @@
-const ricotteAPIUrl = 'https://ricotte-api.deno.dev/'
-
 function login() {
     const username = document.getElementById('username').value
     const password = document.getElementById('password').value
@@ -23,7 +21,6 @@ function login() {
                     document.getElementById('errorMessage').innerHTML = ''
                     document.getElementById('loginFields').classList.add('hidden')
                     document.getElementById('loginButton').classList.add('hidden')
-                    setTimeout(window.close, 5000);
                 } else if (loginResponseAsJson && loginResponseAsJson.error) {
                     document.getElementById('errorMessage').innerHTML = `An error occured while logging into the account for user <b>${username}</b>. Error is:<br /><b>${loginResponseAsJson.error}</b>`
                 }

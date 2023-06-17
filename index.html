@@ -8,9 +8,12 @@
   <title>Ricotte no Mori RPG!</title>
   <link rel="stylesheet" href="css/index.css">
   <script src="js/index.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/login.js"></script>
+  <script src="js/register.js"></script>
 </head>
 
-<body onload="checkIfPlayerIsAvaliable()">
+<body onload="router('game'); checkIfPlayerIsAvaliable();">
   <header>
     <h1>Ricotte no Mori</h1>
   </header>
@@ -23,27 +26,14 @@
       </section>
       <section id="links">
         <h2>Links</h2>
-        <a href="story.html" target="_blank">Story</a>
-        <a href="howtoplay.html" target="_blank">How to play</a>
-        <a class="onlyloggedout hidden" href="register.html" target="_blank">Register</a>
-        <a class="onlyloggedout hidden" href="login.html" target="_blank">Login</a>
-        <a class="onlyloggedin hidden" href="#" onclick="return logout()">Logout</a>
+        <a href="#" onclick="return router('game')">Play</a>
+        <a href="#" onclick="return router('story')">Story</a>
+        <a href="#" onclick="return router('howtoplay')">How to play</a>
+        <a href="#" onclick="return router('register')" class="onlyloggedout hidden">Register</a>
+        <a href="#" onclick="return router('login')"  class="onlyloggedout hidden">Login</a>
+        <a href="#" onclick="return logout()" class="onlyloggedin hidden">Logout</a>
       </section>
-      <section>
-        <h2>Start the game!?</h2>
-        <button onclick="createBattle(true)">Create Tutorial Battle</button>
-        <button class="onlyloggedin hidden" onclick="createBattle(false)">Create User Battle</button>
-        <span class="onlyloggedInForPlayerBattle hidden" id="battleIdInfo"></span>
-        <span class="onlyloggedInForPlayerBattle hidden" id="errorMessage"></span>
-        <section class="onlyloggedInForPlayerBattle hidden" id="battleSection">
-          <section id="battleStatusSection"></section><br />
-          <section id="opponentSection"></section><br />
-          <section id="playerSection"></section><br />
-          <section id="attackSection"></section><br />
-          <button id="showBattleLogsButton" class="hidden" onclick="showBattleLogs()">Show battle logs</button>
-          <section id="attackLogSection" class="hidden"></section><br />
-        </section>
-      </section>
+      <section id="content"></section>
     </article>
   </main>
 </body>
