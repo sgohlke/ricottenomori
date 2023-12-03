@@ -2,6 +2,8 @@ const ricotteAPIUrl = 'https://ricotte-api.deno.dev/'
 const availableMonsterImages = ['greenslime', 'jellyslime', 'punchbag', 'slime']
 let isCurrentBattleTutorialBattle = true
 
+let playerPlayerId
+
 function getPlayerMonsterId(player, unit) {
     return `${player.playerId}-${unit.joinNumber}`
 }
@@ -20,10 +22,10 @@ function updateMonsterHP(player) {
 }
 
 function attack() {
+    document.getElementById('errorMessageSection').innerHTML = ''
     const attackingUnit = document.querySelector('input[name="attacker"]:checked');
     const defendingUnit = document.querySelector('input[name="defender"]:checked');
     if (attackingUnit && defendingUnit) {
-        document.getElementById('attackLogSection').innerHTML += `Attacking opponent monster ${defendingUnit.value} with your monster ${attackingUnit.value}<br>`
         const battleId = document.getElementById('battleId').innerHTML
         fetch(`${ricotteAPIUrl}attack/${battleId}/${attackingUnit.value}/${defendingUnit.value}`, createRequestOptions())
             .then((attackResponse) => {
@@ -34,7 +36,7 @@ function attack() {
                 console.log('Response JSON for attack battle is', attackResponseAsJson)
                 // Refresh battle!
                 if (attackResponseAsJson.error) {
-                    document.getElementById('attackLogSection').innerHTML += `Attack failed with error: ${JSON.stringify(attackResponseAsJson.error)}<br>`
+                    document.getElementById('errorMessageSection').innerHTML = `${attackResponseAsJson.error}<br><br>`
                 } else if (attackResponseAsJson.playerOne && attackResponseAsJson.playerTwo) {
                     if (attackResponseAsJson.playerTwo) {
                         updateMonsterHP(attackResponseAsJson.playerTwo)
@@ -45,8 +47,8 @@ function attack() {
                     }
 
                     // Add counterattack log
-                    if (attackResponseAsJson.counterAttackUnits && attackResponseAsJson.counterAttackUnits.counterAttacker && attackResponseAsJson.counterAttackUnits.counterTarget) {
-                        document.getElementById('attackLogSection').innerHTML += `Opponent performs counterattack. Opponent monster ${attackResponseAsJson.counterAttackUnits.counterAttacker.joinNumber} attacks your monster ${attackResponseAsJson.counterAttackUnits.counterTarget.joinNumber}<br>`
+                    if (attackResponseAsJson.battleActions) {
+                        document.getElementById('attackLogSection').innerHTML = createBattleActionsLog(attackResponseAsJson.battleActions) //`Opponent performs counterattack. Opponent monster ${attackResponseAsJson.counterAttackUnits.counterAttacker.joinNumber} attacks your monster ${attackResponseAsJson.counterAttackUnits.counterTarget.joinNumber}<br>`
                     }
 
                     // Battle has ended
@@ -60,11 +62,11 @@ function attack() {
                 console.error('An error ocurred while creating a battle', error)
             })
     } else if (attackingUnit) {
-        document.getElementById('attackLogSection').innerHTML += "Please select a defending monster!<br>"
+        document.getElementById('errorMessageSection').innerHTML = "Please select a defending monster!<br><br>"
     } else if (defendingUnit) {
-        document.getElementById('attackLogSection').innerHTML += "Please select an attacking monster!<br>"
+        document.getElementById('errorMessageSection').innerHTML = "Please select an attacking monster!<br><br>"
     } else {
-        document.getElementById('attackLogSection').innerHTML += "Please select an attacking and defending monster!<br>"
+        document.getElementById('errorMessageSection').innerHTML = "Please select an attacking and defending monster!<br><br>"
     }
 }
 
@@ -100,6 +102,17 @@ function displayBattleStatus(battleStatusAsNumber, winner = undefined) {
         default:
             return "UNKNOWN"
     }
+}
+
+function createBattleActionsLog(battleActionLog) {
+    let battleLog = `<b>Your battle log:</b><br>`
+    for (const battleAction of battleActionLog) {
+        const attackerName = battleAction.attackingUnit.playerId === playerPlayerId ? 'Player' : 'Opponent'
+        const defenderName = battleAction.defendingUnit.playerId === playerPlayerId ? 'Player' : 'Opponent'
+        battleLog += `${battleAction.attackingUnit.name} (${attackerName}) attacked ${battleAction.defendingUnit.name} (${defenderName})<br>`
+        console.log('Performed battleLog', battleLog)
+    }
+    return battleLog   
 }
 
 function getImageForUnit(unit) {
@@ -147,17 +160,17 @@ function preparePlayerAndOpponentData(battleId) {
                     }
 
                     if (getBattleResponseAsJson.playerTwo) {
+                        opponentPlayerId = getBattleResponseAsJson.playerTwo.playerId
                         document.getElementById('opponentSection').innerHTML = `<div>Your opponents monsters:</div><br> ${displayMonsters(getBattleResponseAsJson.playerTwo)}`
                     }
 
                     if (getBattleResponseAsJson.playerOne) {
+                        playerPlayerId = getBattleResponseAsJson.playerOne.playerId
                         document.getElementById('playerSection').innerHTML = `<div>Your monsters:</div><br> ${displayMonsters(getBattleResponseAsJson.playerOne)}`
                     }
 
                     document.getElementById('attackSection').innerHTML = `<div>Battle Actions:</div><br>  ${createAttackSection(getBattleResponseAsJson.playerOne, getBattleResponseAsJson.playerTwo)}`
-                    document.getElementById('showBattleLogsButton').classList.remove('hidden')
-                    document.getElementById('attackLogSection').innerHTML = `<b>Your battle log:<b><br>`
-                    
+                    document.getElementById('showBattleLogsButton').classList.remove('hidden')                    
                 }
             })
             .catch((error) => {
@@ -168,6 +181,7 @@ function preparePlayerAndOpponentData(battleId) {
 
 function createBattle(isTutorialBattle) {
     document.getElementById('errorMessage').innerHTML = ''
+    document.getElementById('attackLogSection').classList.add('hidden')
     isCurrentBattleTutorialBattle = isTutorialBattle
     checkIfPlayerIsAvaliable()
     console.log(`Create battle with isTutorialBattle ${isCurrentBattleTutorialBattle}`)

@@ -30,6 +30,11 @@ body {
     color: red;
 }
 
+.errorMessage {
+    color: red;
+    font-size: larger;
+}
+
 button {
     font-size: 1.2em;
     border-radius: 4px;
