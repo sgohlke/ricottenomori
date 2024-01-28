@@ -9,7 +9,6 @@ function getPlayerMonsterId(player, unit) {
 }
 
 function updateMonsterHP(player) {
-    console.log('Update Monster HP', JSON.stringify(player))
     if (player && player.unitsInBattle) {
         for (const unit of player.unitsInBattle) {
             const playerMonsterId = getPlayerMonsterId(player, unit)
@@ -23,17 +22,17 @@ function updateMonsterHP(player) {
 
 function attack() {
     document.getElementById('errorMessageSection').innerHTML = ''
-    const attackingUnit = document.querySelector('input[name="attacker"]:checked');
+    const attackingUnit = document.querySelector('input[name="attacker"]');
     const defendingUnit = document.querySelector('input[name="defender"]:checked');
     if (attackingUnit && defendingUnit) {
         const battleId = document.getElementById('battleId').innerHTML
         fetch(`${ricotteAPIUrl}attack/${battleId}/${attackingUnit.value}/${defendingUnit.value}`, createRequestOptions())
             .then((attackResponse) => {
-                console.log('Get attacking response with battle', attackResponse)
+                // console.log('Get attacking response with battle', attackResponse)
                 return attackResponse.json()
             })
             .then((attackResponseAsJson) => {
-                console.log('Response JSON for attack battle is', attackResponseAsJson)
+                // console.log('Response JSON for attack battle is', attackResponseAsJson)
                 // Refresh battle!
                 if (attackResponseAsJson.error) {
                     document.getElementById('errorMessageSection').innerHTML = `${attackResponseAsJson.error}<br><br>`
@@ -50,6 +49,10 @@ function attack() {
                     if (attackResponseAsJson.battleActions) {
                         document.getElementById('attackLogSection').innerHTML = createBattleActionsLog(attackResponseAsJson.battleActions) //`Opponent performs counterattack. Opponent monster ${attackResponseAsJson.counterAttackUnits.counterAttacker.joinNumber} attacks your monster ${attackResponseAsJson.counterAttackUnits.counterTarget.joinNumber}<br>`
                     }
+
+                    // Refresh/Recreate battle actions
+                    document.getElementById('attackSection').innerHTML = `<div>Battle Actions:</div><br>  ${createAttackSection(attackResponseAsJson.turnBar)}`
+
 
                     // Battle has ended
                     if (attackResponseAsJson.battleStatus && attackResponseAsJson.battleStatus === 1 && attackResponseAsJson.battleWinner) {
@@ -70,26 +73,28 @@ function attack() {
     }
 }
 
-function createAttackSection(player, opponent) {
+function createAttackSection(turnBar) {
     let attackSectionHTML = '<div id="attackSectionPanel">'
+    const playerAttackingUnit = turnBar.playerOne.unitsInBattle.find(
+        (unitInBattle) => unitInBattle.joinNumber === turnBar.currentTurn.unitJoinNumber)
+    attackSectionHTML += `<input type="hidden" id="attacker" name="attacker" value="${playerAttackingUnit.joinNumber}"><span>Your attacking unit: ${playerAttackingUnit.name}(${playerAttackingUnit.joinNumber}). Please select your opponents monster to attack!</span><br><br>`
 
-    if (player && player.unitsInBattle) {
-        attackSectionHTML += '<div><span>Attacking unit (player)</span><br>'
-        for (const unit of player.unitsInBattle) {
-            attackSectionHTML += `<div class="monsterSelection" ><input type="radio" id="attacker${unit.joinNumber}" name="attacker" value="${unit.joinNumber}">
-            <label for="attacker${unit.joinNumber}"> ${unit.joinNumber}-${unit.name}</label></div>`
-        }
-    }
-
-    attackSectionHTML += '</div>'
+    const opponent = turnBar.playerTwo
     if (opponent && opponent.unitsInBattle) {
-        attackSectionHTML += '<div><span>Defending unit (opponent)</span><br>'
-        for (const unit of opponent.unitsInBattle) {
-            attackSectionHTML += `<div class="monsterSelection" ><input type="radio" id="defender${unit.joinNumber}" name="defender" value="${unit.joinNumber}">
-            <label for="defender${unit.joinNumber}"> ${unit.joinNumber}-${unit.name}</label></div>`
+        attackSectionHTML += '<div id="attackTargetSelection">'
+        for (let index = 0; index < opponent.unitsInBattle.length; index++) {
+            const unit = opponent.unitsInBattle[index];
+            if (unit.inBattleStatus.hp > 0) {
+                attackSectionHTML += `<div class="monsterSelection" >
+            <label for="defender${unit.joinNumber}"> 
+                <input type="radio" id="defender${unit.joinNumber}" name="defender" value="${unit.joinNumber}" ${index === 0 ? 'checked' : ''}>
+                <span class="wrappable">${unit.joinNumber}-${unit.name}</span>
+            </label></div>`
+            }
         }
     }
-    attackSectionHTML += '</div><button id="attackButton" onclick="attack()">Attack</button></div>'
+    attackSectionHTML += '<button id="attackButton" onclick="attack()">Attack</button></div></div>'
+
     return attackSectionHTML
 }
 
@@ -105,14 +110,14 @@ function displayBattleStatus(battleStatusAsNumber, winner = undefined) {
 }
 
 function createBattleActionsLog(battleActionLog) {
-    let battleLog = `<b>Your battle log:</b><br>`
+    let battleLog = '<b>Your battle log:</b><br>'
     for (const battleAction of battleActionLog) {
         const attackerName = battleAction.attackingUnit.playerId === playerPlayerId ? 'Player' : 'Opponent'
         const defenderName = battleAction.defendingUnit.playerId === playerPlayerId ? 'Player' : 'Opponent'
         battleLog += `${battleAction.attackingUnit.name} (${attackerName}) attacked ${battleAction.defendingUnit.name} (${defenderName})<br>`
-        console.log('Performed battleLog', battleLog)
+        // console.log('Performed battleLog', battleLog)
     }
-    return battleLog   
+    return battleLog
 }
 
 function getImageForUnit(unit) {
@@ -149,11 +154,11 @@ function preparePlayerAndOpponentData(battleId) {
     if (battleId) {
         fetch(`${ricotteAPIUrl}getBattle/${battleId}`, createRequestOptions())
             .then((getBattleResponse) => {
-                console.log('Get response with battle', getBattleResponse)
+                // console.log('Get response with battle', getBattleResponse)
                 return getBattleResponse.json()
             })
             .then((getBattleResponseAsJson) => {
-                console.log('Response JSON for created battle is', getBattleResponseAsJson)
+                // console.log('Response JSON for created battle is', getBattleResponseAsJson)
                 if (getBattleResponseAsJson) {
                     if (getBattleResponseAsJson.battleStatus !== undefined) {
                         document.getElementById('battleStatusSection').innerHTML = `<span>Battle Status: ${displayBattleStatus(getBattleResponseAsJson.battleStatus)}</span><br>`
@@ -169,8 +174,8 @@ function preparePlayerAndOpponentData(battleId) {
                         document.getElementById('playerSection').innerHTML = `<div>Your monsters:</div><br> ${displayMonsters(getBattleResponseAsJson.playerOne)}`
                     }
 
-                    document.getElementById('attackSection').innerHTML = `<div>Battle Actions:</div><br>  ${createAttackSection(getBattleResponseAsJson.playerOne, getBattleResponseAsJson.playerTwo)}`
-                    document.getElementById('showBattleLogsButton').classList.remove('hidden')                    
+                    document.getElementById('attackSection').innerHTML = `<div>Battle Actions:</div><br>  ${createAttackSection(getBattleResponseAsJson.turnBar)}`
+                    document.getElementById('showBattleLogsButton').classList.remove('hidden')
                 }
             })
             .catch((error) => {
@@ -181,10 +186,10 @@ function preparePlayerAndOpponentData(battleId) {
 
 function createBattle(isTutorialBattle) {
     document.getElementById('errorMessage').innerHTML = ''
+    document.getElementById('attackLogSection').innerHTML = ''
     document.getElementById('attackLogSection').classList.add('hidden')
     isCurrentBattleTutorialBattle = isTutorialBattle
     checkIfPlayerIsAvaliable()
-    console.log(`Create battle with isTutorialBattle ${isCurrentBattleTutorialBattle}`)
     if (!isCurrentBattleTutorialBattle) {
         try {
             currentPlayer = extractPlayerFromCookie()
@@ -204,11 +209,11 @@ function createBattle(isTutorialBattle) {
     } else {
         fetch(createBattleURL, createRequestOptions())
             .then((createBattleResponse) => {
-                console.log('Get response with battleId', createBattleResponse)
+                // console.log('Get response with battleId', createBattleResponse)
                 return createBattleResponse.json()
             })
             .then((createBattleResponseAsJson) => {
-                console.log('Response JSON for created battleId is', createBattleResponseAsJson)
+                // console.log('Response JSON for created battleId is', createBattleResponseAsJson)
                 if (createBattleResponseAsJson && createBattleResponseAsJson.battleId) {
                     // Add battleId to the battle info
                     document.getElementById('battleIdInfo').innerHTML = `<br>(Your battleId is: <span id="battleId">${createBattleResponseAsJson.battleId}</span>)`
@@ -236,7 +241,7 @@ function getCreateBattleURL(isTutorialBattle) {
 
 function extractPlayerFromCookie() {
     const playerCookie = document.cookie?.split('=')[1];
-    console.log('PlayerCookie is ' + playerCookie)
+    // console.log('PlayerCookie is ' + playerCookie)
     if (playerCookie) {
         try {
             const parsedPlayerCookie = JSON.parse(playerCookie)
@@ -261,6 +266,10 @@ function createRequestOptions() {
 }
 
 function showBattleLogs() {
+    const existingAttackLogEntries = document.getElementById('attackLogSection').innerText
+    if (existingAttackLogEntries.length === 0) {
+        document.getElementById('attackLogSection').innerHTML = '<b>Your battle log:</b><br>'
+    }
     document.getElementById('attackLogSection').classList.remove('hidden')
     document.getElementById('showBattleLogsButton').classList.add('hidden')
 }

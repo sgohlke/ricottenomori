@@ -9,8 +9,7 @@ body {
     width: 2%
 }
 
-.monsters,
-#attackSectionPanel {
+.monsters, #attackTargetSelection {
     display: flex;
     flex-direction: row;
     justify-content: flex-start;
