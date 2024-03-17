@@ -50,14 +50,12 @@ function attack() {
                         document.getElementById('attackLogSection').innerHTML = createBattleActionsLog(attackResponseAsJson.battleActions) //`Opponent performs counterattack. Opponent monster ${attackResponseAsJson.counterAttackUnits.counterAttacker.joinNumber} attacks your monster ${attackResponseAsJson.counterAttackUnits.counterTarget.joinNumber}<br>`
                     }
 
-                    // Refresh/Recreate battle actions
-                    document.getElementById('attackSection').innerHTML = `<div>Battle Actions:</div><br>  ${createAttackSection(attackResponseAsJson.turnBar)}`
-
-
                     // Battle has ended
                     if (attackResponseAsJson.battleStatus && attackResponseAsJson.battleStatus === 1 && attackResponseAsJson.battleWinner) {
                         document.getElementById('battleStatusSection').innerHTML = `<span>Battle Status: ${displayBattleStatus(attackResponseAsJson.battleStatus, attackResponseAsJson.battleWinner)}</span><br>`
                         document.getElementById('attackSection').innerHTML = ''
+                    } else { // Refresh/Recreate battle actions
+                        document.getElementById('attackSection').innerHTML = `<div>Battle Actions:</div><br>  ${createAttackSection(attackResponseAsJson.turnBar)}`
                     }
                 }
             })
